@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Word Catcher</title>
+<style>
+  body {
+    margin: 0;
+    background: #222;
+    color: white;
+    font-family: Arial;
+    text-align: center;
+  }
+  canvas {
+    background: #111;
+    display: block;
+    margin: auto;
+    border: 2px solid white;
+  }
+  #choices button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>🎮 Word Catcher</h1>
+<p>Doğru çeviriyi seç!</p>
+
+<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+<div id="choices"></div>
+<p>Puan: <span id="score">0</span> | Can: <span id="lives">3</span></p>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let score = 0;
+let lives = 3;
+
+const words = [
+  {eng:"apple", tr:"elma"},
+  {eng:"car", tr:"araba"},
+  {eng:"house", tr:"ev"},
+  {eng:"dog", tr:"köpek"},
+  {eng:"book", tr:"kitap"}
+];
+
+let currentWord = null;
+let y = 0;
+
+function newWord() {
+  currentWord = words[Math.floor(Math.random() * words.length)];
+  y = 0;
+  generateChoices();
+}
+
+function generateChoices() {
+  const choicesDiv = document.getElementById("choices");
+  choicesDiv.innerHTML = "";
+
+  let correct = currentWord.tr;
+  let options = [correct];
+
+  while(options.length < 3) {
+    let rand = words[Math.floor(Math.random() * words.length)].tr;
+    if(!options.includes(rand)) options.push(rand);
+  }
+
+  options.sort(() => Math.random() - 0.5);
+
+  options.forEach(opt => {
+    let btn = document.createElement("button");
+    btn.innerText = opt;
+    btn.onclick = () => checkAnswer(opt);
+    choicesDiv.appendChild(btn);
+  });
+}
+
+function checkAnswer(answer) {
+  if(answer === currentWord.tr) {
+    score++;
+  } else {
+    lives--;
+  }
+  updateUI();
+  newWord();
+}
+
+function updateUI() {
+  document.getElementById("score").innerText = score;
+  document.getElementById("lives").innerText = lives;
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.font = "30px Arial";
+  ctx.fillStyle = "white";
+  ctx.fillText(currentWord.eng, 150, y);
+
+  y += 2;
+
+  if(y > canvas.height) {
+    lives--;
+    updateUI();
+    newWord();
+  }
+
+  if(lives > 0) {
+    requestAnimationFrame(draw);
+  } else {
+    ctx.fillText("GAME OVER", 120, 200);
+  }
+}
+
+newWord();
+draw();
+</script>
+
+</body>
+</html>
